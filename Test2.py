@@ -4,7 +4,7 @@ import torch.nn as nn
 import numpy as np
 import os
 import cv2
-import torchvision.transforms as transforms
+# import torchvision.transforms.v2 as transforms
 from torch.utils.data import DataLoader, Dataset
 import matplotlib.pyplot as plt
 from model2 import UNetMobileNetV3  
@@ -15,7 +15,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Define Paths
 test_image_dir = r"C:\Users\Kharb\Desktop\capstone\CSCI447_FinalProject-main\CSCI447_FinalProject-main\data\input\test\images"
 test_mask_dir = r"C:\Users\Kharb\Desktop\capstone\CSCI447_FinalProject-main\CSCI447_FinalProject-main\data\input\test\masks"
-model_path = "model3.pth"
+model_path = "train2_2.pth"
 output_dir = "predictions_vs_ground_truth2"
 
 # Create output directory if not exists

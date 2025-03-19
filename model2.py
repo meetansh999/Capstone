@@ -4,7 +4,7 @@ import torch.nn as nn
 import segmentation_models_pytorch as smp
 
 class UNetMobileNetV3(nn.Module):
-    def __init__(self, num_classes, dropout_p=0.2):  # Introduce dropoout probability
+    def __init__(self, num_classes, dropout_p=0.3):  # Introduce dropoout probability
         super(UNetMobileNetV3, self).__init__()
         
         self.model = smp.Unet(
