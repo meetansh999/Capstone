@@ -4,7 +4,7 @@ import torch.nn as nn
 import segmentation_models_pytorch as smp
 
 class UNetMobileNetV3(nn.Module):
-    def __init__(self, num_classes, dropout_p=0.3):  # Introduce dropoout probability
+    def __init__(self, num_classes, dropout_p=0.4):  # Introduce dropoout probability
         super(UNetMobileNetV3, self).__init__()
         
         self.model = smp.Unet(
@@ -38,13 +38,13 @@ class UNetMobileNetV3(nn.Module):
         return self.model.segmentation_head(out)
 
 # Function to initialize and return the model
-def get_model(num_classes, dropout_p=0.3):
+def get_model(num_classes, dropout_p=0.4):
     return UNetMobileNetV3(num_classes=num_classes, dropout_p=dropout_p)
 
 # main implementation
 if __name__ == "__main__":
     num_classes = 5
-    model = get_model(num_classes, dropout_p=0.3)  
+    model = get_model(num_classes, dropout_p=0.4)  
     model = model.to("cuda" if torch.cuda.is_available() else "cpu")
 
     # Print model summary

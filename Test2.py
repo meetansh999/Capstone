@@ -15,8 +15,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Define Paths
 test_image_dir = r"C:\Users\Kharb\Desktop\capstone\CSCI447_FinalProject-main\CSCI447_FinalProject-main\data\input\test\images"
 test_mask_dir = r"C:\Users\Kharb\Desktop\capstone\CSCI447_FinalProject-main\CSCI447_FinalProject-main\data\input\test\masks"
-model_path = "train2_2.pth"
-output_dir = "predictions_vs_ground_truth2"
+model_path = "train2_4.pth"
+output_dir = "predictions_vs_ground_truth4"
 
 # Create output directory if not exists
 os.makedirs(output_dir, exist_ok=True)
@@ -107,7 +107,9 @@ def compute_dice_coefficient(preds, targets):
 def convert_to_color(mask):
     """Convert class index mask to RGB color mask."""
     h, w = mask.shape
+    print(mask.shape)
     color_mask = np.zeros((h, w, 3), dtype=np.uint8)
+
     for class_idx, color in CLASS_TO_COLOR.items():
         color_mask[mask == class_idx] = color
     return color_mask

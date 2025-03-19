@@ -39,7 +39,7 @@ class OilSpillDataset(Dataset):
             transforms.RandomHorizontalFlip(p=0.4),
             transforms.RandomVerticalFlip(p=0.4),
             transforms.RandomRotation(degrees=80),
-            transforms.ElasticTransform(alpha=125, sigma=2, interpolation=transforms.InterpolationMode.NEAREST, fill=0) 
+            transforms.ElasticTransform(alpha=125, sigma=2, interpolation=transforms.InterpolationMode.BILINEAR, fill=0) 
         ])
 
         # ✅ Noise & Blur (Apply Only to Images)
@@ -98,7 +98,7 @@ val_image_dir = r"C:\Users\Kharb\Desktop\capstone\CSCI447_FinalProject-main\CSCI
 val_mask_dir = r"C:\Users\Kharb\Desktop\capstone\CSCI447_FinalProject-main\CSCI447_FinalProject-main\data\input\val\masks"
 
 # Define Loss Functions
-loss_fn = nn.CrossEntropyLoss(weight=torch.tensor([0.3, 2.5, 1.8, 1.2, 1.0], device=device))  # class weights
+loss_fn = nn.CrossEntropyLoss(weight=torch.tensor([0.3, 2.5, 1.7, 1.8, 1.0], device=device))  # class weights
 
 
 class DiceLoss(nn.Module):
@@ -128,11 +128,11 @@ if __name__ == "__main__":
     
     model = UNetMobileNetV3(num_classes=5).to(device)  
 
-    num_epochs = 40
+    num_epochs = 50
 
-    optimizer = optim.AdamW(model.parameters(), lr=0.0002, weight_decay=1e-4)  
+    optimizer = optim.AdamW(model.parameters(), lr=0.0001, weight_decay=1e-2)  
 
-    scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
+    scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
     scaler = GradScaler("cuda")
 
     # Store lossess as lists 
@@ -192,5 +192,5 @@ if __name__ == "__main__":
             torch.cuda.empty_cache()
 
     # save model
-    torch.save(model.state_dict(), "train2_2.pth")
+    torch.save(model.state_dict(), "train2_3.pth")
     print("Training complete! Model saved.")

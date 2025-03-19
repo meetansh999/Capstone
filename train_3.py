@@ -35,18 +35,19 @@ class OilSpillDataset(Dataset):
             (0, 153, 0): 4      # Land (Green)
         }
 
-        # Transformations (Apply only to images)
-        self.img_transforms = transforms.Compose([
-            transforms.RandomHorizontalFlip(p=0.3),  # 30% chance of flipping horizontally
-            transforms.RandomVerticalFlip(p=0.3),    # 30% chance of flipping vertically
-            transforms.RandomRotation(degrees=30),
-            transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.1, 2.0)),  # ✅ Added Gaussian Blur
-            transforms.GaussianNoise(mean = 0.0, sigma=0.3),  # ✅ Added Gaussian Noise
-            transforms.ElasticTransform(alpha=125, sigma=2, interpolation=transforms.InterpolationMode.BILINEAR, fill= 0),
-            transforms.Resize((224, 224)),    
+        # ✅ Geometric Transforms (Apply to Both Images & Masks)
+        self.geo_transforms = transforms.Compose([
+            transforms.RandomHorizontalFlip(p=0.4),
+            transforms.RandomVerticalFlip(p=0.4),
+            transforms.RandomRotation(degrees=80),
+            transforms.ElasticTransform(alpha=125, sigma=2, interpolation=transforms.InterpolationMode.BILINEAR, fill=0) 
         ])
 
-    
+        # ✅ Noise & Blur (Apply Only to Images)
+        self.img_transforms = transforms.Compose([
+            transforms.GaussianNoise(mean=0.0, sigma=0.05),
+            transforms.GaussianBlur(kernel_size=(3, 3), sigma=(0.1, 2.0))
+        ])
 
     def _convert_mask(self, mask):
         """Convert an RGB mask to class indices based on predefined color mappings."""
@@ -77,12 +78,20 @@ class OilSpillDataset(Dataset):
         mask = torch.tensor(mask, dtype=torch.long)
 
         
+        
         if self.augment:
-            stacked = torch.cat([image, mask.unsqueeze(0)], dim=0)  
-            stacked = self.img_transforms(stacked)  
-            image, mask = stacked[0:1], stacked[1]  
+            # ✅ Apply geometric transformations to both image & mask
+            stacked = torch.cat([image, mask.unsqueeze(0)], dim=0)
+            stacked = self.geo_transforms(stacked)  
+            image, mask = stacked[0:1], stacked[1]
+
+            # ✅ Apply noise & blur ONLY to images
+            image = self.img_transforms(image)
 
         return image, mask
+
+    def __len__(self):
+        return len(self.image_filenames)
 
 
     def __len__(self):
@@ -100,7 +109,7 @@ val_mask_dir = r"C:\Users\Kharb\Desktop\capstone\CSCI447_FinalProject-main\CSCI4
 class HybridLoss(nn.Module):
     def __init__(self):
         super(HybridLoss, self).__init__()
-        self.ce_loss = nn.CrossEntropyLoss(weight=torch.tensor([0.3, 2.5, 1.8, 1.2, 1.0], device=device), reduction="mean")
+        self.ce_loss = nn.CrossEntropyLoss(weight=torch.tensor([0.3, 2.5, 1.5, 1.9, 1.0], device=device), reduction="mean")
 
     def dice_loss(self, preds, targets):
         smooth = 1.0
@@ -120,7 +129,7 @@ class HybridLoss(nn.Module):
         ce = self.ce_loss(preds, targets)  # ✅ Already scalar due to reduction="mean"
         dice = self.dice_loss(preds, targets)
         focal = self.focal_loss(preds, targets)
-        return ce + 0.5 * dice + 0.5 * focal  # ✅ Ensuring final loss is a scalar
+        return 0.6*ce + 0.6 * dice + 0.8 * focal  # ✅ Ensuring final loss is a scalar
 
 
 loss_fn = HybridLoss().to(device)
@@ -141,8 +150,8 @@ if __name__ == "__main__":
     print(f"Model on CUDA: {next(model.parameters()).is_cuda}")
 
     num_epochs = 30
-    optimizer = optim.AdamW(model.parameters(), lr=0.0001, weight_decay=5e-3)
-    scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.3, patience=5)
+    optimizer = optim.AdamW(model.parameters(), lr=0.0001, weight_decay=1e-2)
+    scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.3, patience=3)
     scaler = GradScaler("cuda")
 
     train_losses, val_losses = [], []
