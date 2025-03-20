@@ -15,8 +15,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Define Paths
 test_image_dir = r"C:\Users\Kharb\Desktop\capstone\CSCI447_FinalProject-main\CSCI447_FinalProject-main\data\input\test\images"
 test_mask_dir = r"C:\Users\Kharb\Desktop\capstone\CSCI447_FinalProject-main\CSCI447_FinalProject-main\data\input\test\masks"
-model_path = "train2_4.pth"
-output_dir = "predictions_vs_ground_truth4"
+model_path = "best_modelnow.pth"
+output_dir = "best_setmaybeoo"
 
 # Create output directory if not exists
 os.makedirs(output_dir, exist_ok=True)
@@ -136,7 +136,7 @@ with torch.no_grad():
         print(f"Sample {num_samples}: mIoU = {miou:.4f}, Accuracy = {accuracy:.4f}, Dice Coefficient = {dice:.4f}")
 
         # Visualization for first 5 samples
-        if idx < 5:
+        if idx < 60:
             image_np = images.squeeze(0).cpu().numpy().transpose(1, 2, 0) * 255
             image_np = image_np.astype(np.uint8)
             gt_mask_np = masks.squeeze(0).cpu().numpy()
